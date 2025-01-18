@@ -3,6 +3,7 @@
 
 #include <limits.h>
 #include <stddef.h>
+#include <stdint.h>
 
 typedef void (*hexdump_callback)(const char *line, size_t len, int lastline);
 
