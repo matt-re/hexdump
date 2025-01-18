@@ -9,7 +9,7 @@ typedef void (*hexdump_callback)(const char *line, size_t len, int lastline);
 #ifdef __cplusplus
 extern "C" {
 #endif
-extern void hexdump(const void *ptr, size_t size, uintptr_t whence, hexdump_callback cb);
+void hexdump(const void *ptr, size_t size, uintptr_t whence, hexdump_callback cb);
 #ifdef __cplusplus
 }
 #endif
