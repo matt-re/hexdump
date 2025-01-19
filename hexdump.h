@@ -81,7 +81,7 @@ hexdump(const void *ptr, size_t size, uintptr_t whence, hexdump_callback cb)
 		whence += bpr;
 		cur += bpr;
 		if (cb) {
-			cb(line, linelen, cur >= end);
+			cb(line, linelen, !(end > cur));
 		}
 	}
 }
