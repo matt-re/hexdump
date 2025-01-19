@@ -1,7 +1,6 @@
 #ifndef INCLUDE_HEXDUMP_H
 #define INCLUDE_HEXDUMP_H
 
-#include <limits.h>
 #include <stddef.h>
 #include <stdint.h>
 
@@ -42,13 +41,12 @@ hexdump(const void *ptr, size_t size, uintptr_t whence, hexdump_callback cb)
 	 * 659    256   bytes per line printed as ascii
 	 * 915    1     nul terminator
 	 */
-	char line[16 + 2 + (256 * 2) + (256 / 2) + 1 + 256 + 1];
-	const size_t addrlen = sizeof(void *);
-	const size_t addrlenbits = addrlen * CHAR_BIT;
-	const size_t dataoff = addrlen * 2 + 2;
+	char line[(sizeof(void *) * 2) + 2 + (256 * 2) + (256 / 2) + 1 + 256 + 1];
+	const size_t addrlen = sizeof(void *) * 2;
+	const size_t dataoff = addrlen + 2;
 	const size_t datalen = 2 * bpr + bpr / 2;
 	const size_t textoff = dataoff + datalen + 1;
-	const size_t linelen = textoff + 1 + bpr;
+	const size_t linelen = textoff + bpr + 1;
 	for (char *ch = line; ch < (line + linelen - 2); ch++) {
 		*ch = ' ';
 	}
@@ -62,7 +60,7 @@ hexdump(const void *ptr, size_t size, uintptr_t whence, hexdump_callback cb)
 		char *addr = line;
 		char *data = line + dataoff;
 		char *text = line + textoff;
-		for (size_t i = addrlenbits; i > 0; i -= 4) {
+		for (size_t i = sizeof(void *) * 8; i > 0; i -= 4) {
 			*addr++ = hex[(whence >> (i - 4)) & 15];
 		}
 		*addr = ':';
