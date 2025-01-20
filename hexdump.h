@@ -64,18 +64,20 @@ hexdump(const void *ptr, size_t size, uintptr_t whence, hexdump_callback cb)
 			*addr++ = hex[(whence >> (i - 4)) & 15];
 		}
 		*addr = ':';
-		for (unsigned int i = 0; i < bpr; i++) {
-			if ((cur + i) >= end) {
-				*data++ = ' ';
-				*data++ = ' ';
-				*text++ = ' ';
-			} else {
-				char ch = cur[i];
-				*data++ = hex[(ch >> 4) & 15];
-				*data++ = hex[(ch >> 0) & 15];
-				*text++ = ch > 31 && ch < 127 ? ch : '.';
-			}
+		ptrdiff_t len = (end - cur) < bpr ? (end - cur) : bpr;
+		ptrdiff_t i = 0;
+		for (; i < len; i++) {
+			char ch = cur[i];
+			*data++ = hex[(ch >> 4) & 15];
+			*data++ = hex[(ch >> 0) & 15];
+			*text++ = ch > 31 && ch < 127 ? ch : '.';
 			/* jump over separator between every two bytes */
+			data += i % 2;
+		}
+		for (; i < bpr; i++) {
+			*data++ = ' ';
+			*data++ = ' ';
+			*text++ = ' ';
 			data += i % 2;
 		}
 		whence += bpr;
