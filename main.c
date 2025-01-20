@@ -6,7 +6,8 @@
 static void
 print(const char *line, size_t len)
 {
-	printf("%.*s\n", (int)len, line);
+	(void)len;
+	printf("%s\n", line);
 }
 
 int
