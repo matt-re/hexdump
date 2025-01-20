@@ -4,7 +4,7 @@
 #include <stddef.h>
 #include <stdint.h>
 
-typedef void (*hexdump_callback)(const char *line, size_t len, int lastline);
+typedef void (*hexdump_callback)(const char *line, size_t len);
 
 #ifdef __cplusplus
 extern "C" {
@@ -83,7 +83,7 @@ hexdump(const void *ptr, size_t size, uintptr_t whence, hexdump_callback cb)
 		whence += bpr;
 		cur += bpr;
 		if (cb) {
-			cb(line, linelen, !(end > cur));
+			cb(line, linelen);
 		}
 	}
 }

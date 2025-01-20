@@ -3,12 +3,9 @@
 #define HEXDUMP_IMPLEMENTATION
 #include "hexdump.h"
 
-#define UNUSED(x) ((void)x)
-
 static void
-print(const char *line, size_t len, int lastline)
+print(const char *line, size_t len)
 {
-	UNUSED(lastline);
 	printf("%.*s\n", (int)len, line);
 }
 
