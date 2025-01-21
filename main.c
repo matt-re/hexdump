@@ -4,9 +4,8 @@
 #include "hexdump.h"
 
 static void
-print(const char *line, size_t len)
+print(const char *line)
 {
-	(void)len;
 	printf("%s\n", line);
 }
 
