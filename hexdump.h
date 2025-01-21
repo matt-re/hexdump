@@ -34,7 +34,7 @@ hexdump(const void *ptr, size_t size, uintptr_t whence, hexdump_callback cb)
 	 * 82     16    char separator between each 2 bytes
 	 *              including after the last one
 	 * 98     1     char separator between hex and ascii
-	 * 99     32   bytes per line printed as ascii
+	 * 99     32    bytes per line printed as ascii
 	 * 131    1     nul terminator
 	 */
 	char line[(sizeof(void *) * 2) + 2 + (32 * 2) + (32 / 2) + 1 + 32 + 1];
