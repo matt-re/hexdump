@@ -22,33 +22,22 @@ hexdump(const void *ptr, size_t size, uintptr_t whence, hexdump_callback cb)
 {
 	char const * cur = ptr;
 	char const * const end = (char *)ptr + size;
-	/* bytes per row/line */
-	int wide = 0;
-	unsigned int bpr = wide ? 32 : 16;
-	/* max line length 132, when bpr == 32
-	 * index  size  description
+	/* index  size  description
 	 * ------------------------
 	 * 0      16    address in bytes in hex (64-bit pointer)
 	 * 16     2     separator between address and data
-	 * 18     64    bytes per line printed in hex
-	 * 82     16    char separator between each 2 bytes
-	 *              including after the last one
-	 * 98     1     char separator between hex and ascii
-	 * 99     32    bytes per line printed as ascii
-	 * 131    1     nul terminator
+	 * 18     32    16 bytes per line printed in hex
+	 * 50     8     char separator after each 2 bytes
+	 * 58     1     char separator between hex and ascii
+	 * 59     16    16 bytes per line printed as ascii
+	 * 75     1     nul terminator
 	 */
-	char line[(sizeof(void *) * 2) + 2 + (32 * 2) + (32 / 2) + 1 + 32 + 1];
-	const size_t addrlen = sizeof(void *) * 2;
-	const size_t dataoff = addrlen + 2;
-	const size_t datalen = 2 * bpr + bpr / 2;
-	const size_t textoff = dataoff + datalen + 1;
-	/* exclude the NUL character from the line length */
-	const size_t linelen = textoff + bpr;
-	for (char *ch = line; ch < (line + linelen); ch++) {
-		*ch = ' ';
+	char line[76];
+	for (size_t i = 0; i < sizeof(line) - 1; i++) {
+		line[i] = ' ';
 	}
-	line[addrlen] = ':';
-	line[linelen] = '\0';
+	line[16] = ':';
+	line[sizeof(line) - 1] = '\0';
 	const char hex[] = "0123456789abcdef";
 	const int zeroaddr = 1;
 	if (whence == 0) {
@@ -56,12 +45,12 @@ hexdump(const void *ptr, size_t size, uintptr_t whence, hexdump_callback cb)
 	}
 	while (end > cur) {
 		char *addr = line;
-		char *data = line + dataoff;
-		char *text = line + textoff;
+		char *data = line + 18;
+		char *text = line + 59;
 		for (size_t i = sizeof(void *) * 8; i > 0; i -= 4) {
 			*addr++ = hex[(whence >> (i - 4)) & 15];
 		}
-		ptrdiff_t len = (end - cur) < bpr ? (end - cur) : bpr;
+		ptrdiff_t len = (end - cur) < 16 ? (end - cur) : 16;
 		ptrdiff_t i = 0;
 		for (; i < len; i++) {
 			char ch = cur[i];
@@ -71,16 +60,16 @@ hexdump(const void *ptr, size_t size, uintptr_t whence, hexdump_callback cb)
 			/* jump over separator between every two bytes */
 			data += i % 2;
 		}
-		for (; i < bpr; i++) {
+		for (; i < 16; i++) {
 			*data++ = ' ';
 			*data++ = ' ';
 			*text++ = ' ';
 			data += i % 2;
 		}
-		whence += bpr;
-		cur += bpr;
+		whence += 16;
+		cur += 16;
 		if (cb) {
-			cb(line, linelen);
+			cb(line, sizeof(line) - 1);
 		}
 	}
 }
