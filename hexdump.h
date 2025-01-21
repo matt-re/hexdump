@@ -48,7 +48,7 @@ hexdump(const void *ptr, size_t size, uintptr_t whence, hexdump_callback cb)
 	const size_t textoff = dataoff + datalen + 1;
 	/* exclude the NUL character from the line length */
 	const size_t linelen = textoff + bpr;
-	for (char *ch = line; ch < (line + linelen - 2); ch++) {
+	for (char *ch = line; ch < (line + linelen); ch++) {
 		*ch = ' ';
 	}
 	line[addrlen] = ':';
