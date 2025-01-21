@@ -23,25 +23,21 @@ hexdump(const void *ptr, size_t size, uintptr_t whence, hexdump_callback cb)
 	char const * cur = ptr;
 	char const * const end = (char *)ptr + size;
 	/* bytes per row/line */
-	unsigned int bpr = 16;
-	if (bpr == 0) {
-		bpr = 16;
-	} else if (bpr > 256) {
-		bpr = 256;
-	}
-	/* max line length 916, when bpr == 256
+	int wide = 0;
+	unsigned int bpr = wide ? 32 : 16;
+	/* max line length 132, when bpr == 32
 	 * index  size  description
 	 * ------------------------
 	 * 0      16    address in bytes in hex (64-bit pointer)
 	 * 16     2     separator between address and data
-	 * 18     512   bytes per line printed in hex
-	 * 530    128   char separator between each 2 bytes
+	 * 18     64    bytes per line printed in hex
+	 * 82     16    char separator between each 2 bytes
 	 *              including after the last one
-	 * 658    1     char separator between hex and ascii
-	 * 659    256   bytes per line printed as ascii
-	 * 915    1     nul terminator
+	 * 98     1     char separator between hex and ascii
+	 * 99     32   bytes per line printed as ascii
+	 * 131    1     nul terminator
 	 */
-	char line[(sizeof(void *) * 2) + 2 + (256 * 2) + (256 / 2) + 1 + 256 + 1];
+	char line[(sizeof(void *) * 2) + 2 + (32 * 2) + (32 / 2) + 1 + 32 + 1];
 	const size_t addrlen = sizeof(void *) * 2;
 	const size_t dataoff = addrlen + 2;
 	const size_t datalen = 2 * bpr + bpr / 2;
