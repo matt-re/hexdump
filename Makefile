@@ -26,5 +26,5 @@ clean:
 	@rm -f hexdump *.o
 
 run: hexdump
-	./hexdump
+	./hexdump main.c
 
