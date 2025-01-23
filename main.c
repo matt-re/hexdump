@@ -19,12 +19,12 @@ main(int argc, char *argv[])
 	char buf[512];
 	uintptr_t whence = 0;
 	for (;;) {
-		size_t n = fread(buf, sizeof *buf, sizeof buf, file);
-		if (n == 0) {
+		size_t nread = fread(buf, sizeof *buf, sizeof buf, file);
+		if (nread == 0) {
 			break;
 		}
-		hexdump(buf, n, whence, print);
-		whence += n;
+		hexdump(buf, nread, whence, print);
+		whence += nread;
 	}
 	if (file != stdin) {
 		fclose(file);
