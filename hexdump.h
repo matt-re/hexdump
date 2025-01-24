@@ -4,12 +4,12 @@
 #include <stddef.h>
 #include <stdint.h>
 
-typedef void (*hexdump_callback)(const char *line);
+typedef void (*hexdump_callback)(const char *line, size_t len, void *data);
 
 #ifdef __cplusplus
 extern "C" {
 #endif
-void hexdump(const void *ptr, size_t size, uintptr_t whence, hexdump_callback cb);
+void hexdump(const void *ptr, size_t size, uintptr_t whence, hexdump_callback cb, void *cbdata);
 #ifdef __cplusplus
 }
 #endif
@@ -18,7 +18,7 @@ void hexdump(const void *ptr, size_t size, uintptr_t whence, hexdump_callback cb
 #ifdef HEXDUMP_IMPLEMENTATION
 
 void
-hexdump(const void *ptr, size_t size, uintptr_t whence, hexdump_callback cb)
+hexdump(const void *ptr, size_t size, uintptr_t whence, hexdump_callback cb, void *cbdata)
 {
 	char const * cur = ptr;
 	char const * const end = (char *)ptr + size;
@@ -69,7 +69,7 @@ hexdump(const void *ptr, size_t size, uintptr_t whence, hexdump_callback cb)
 		whence += 16;
 		cur += 16;
 		if (cb) {
-			cb(line);
+			cb(line, sizeof(line) - 1, cbdata);
 		}
 	}
 }
