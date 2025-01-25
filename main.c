@@ -22,9 +22,7 @@ flush(struct buffer *buf)
 {
 	if (!buf->err && buf->len) {
 		size_t nitems = fwrite(buf->buf, 1, buf->len, stdout);
-		if (nitems != buf->len) {
-			buf->err = 1;
-		}
+		buf->err |= nitems != buf->len;
 		buf->len = 0;
 	}
 }
