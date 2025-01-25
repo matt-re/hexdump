@@ -68,7 +68,7 @@ main(int argc, char *argv[])
 		return 1;
 	}
 	char buf[512];
-	uintptr_t whence = 0;
+	unsigned int whence = 0;
 	char outbuf[1024];
 	struct buffer output = {
 		.buf = outbuf,
