@@ -35,7 +35,6 @@ hexdump(const void *ptr, size_t size, unsigned int whence, hexdump_callback cb, 
 	for (size_t i = 0; i < sizeof(line) - 1; i++) {
 		line[i] = ' ';
 	}
-	line[8] = ':';
 	const char hex[] = "0123456789abcdef";
 	while (end > cur) {
 		char *addr = line;
@@ -44,6 +43,7 @@ hexdump(const void *ptr, size_t size, unsigned int whence, hexdump_callback cb, 
 		for (int i = sizeof(whence) * 7; i >= 0; i -= 4) {
 			*addr++ = hex[(whence >> i) & 15];
 		}
+		*addr++ = ':';
 		ptrdiff_t len = (end - cur) < 16 ? (end - cur) : 16;
 		ptrdiff_t i = 0;
 		for (; i < len; i++) {
