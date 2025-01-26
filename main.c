@@ -1,8 +1,50 @@
 #include <stdio.h>
 #include <string.h>
 
+#ifndef _WIN32
+#include <unistd.h>
+#endif /* _WIN32 */
+
 #define HEXDUMP_IMPLEMENTATION
 #include "hexdump.h"
+
+#ifdef _WIN32
+#define STDOUT_FILENO ((uintptr_t)stdout)
+
+static int
+os_write(uintptr_t fd, const void *buf, size_t size)
+{
+	/* TODO replace with Win32 Write API calls */
+	if (!fd) {
+		return 0;
+	}
+	size_t nitems = fwrite(buf, 1, size, (FILE *)fd);
+	return nitems == size;
+}
+#else /* _WIN32 */
+static int
+os_write(uintptr_t fd, const void *buf, size_t size)
+{
+	int filedes = (int)fd;
+	if (!filedes) {
+		return 0;
+	}
+	int result = 1;
+	while (size) {
+		size_t nwrite = (size_t)write(filedes, buf, size);
+		if (nwrite == (size_t)-1) {
+			result = 0;
+			break;
+		}
+		if (nwrite == size) {
+			break;
+		}
+		buf = (char *)buf + nwrite;
+		size -= nwrite;
+	}
+	return result;
+}
+#endif /* _WIN32 */
 
 /*
  * Buffered output from the blog post
@@ -14,6 +56,7 @@ struct buffer
 	char *buf;
 	size_t cap;
 	size_t len;
+	uintptr_t fd;
 	int err;
 };
 
@@ -21,8 +64,7 @@ static void
 flush(struct buffer *buf)
 {
 	if (!buf->err && buf->len) {
-		size_t nitems = fwrite(buf->buf, 1, buf->len, stdout);
-		buf->err |= nitems != buf->len;
+		buf->err |= !os_write(buf->fd, buf->buf, buf->len);
 		buf->len = 0;
 	}
 }
@@ -72,7 +114,8 @@ main(int argc, char *argv[])
 		.buf = outbuf,
 		.cap = sizeof outbuf,
 		.len = 0,
-		.err = 0
+		.err = 0,
+		.fd = STDOUT_FILENO
 	};
 	for (;;) {
 		size_t nread = fread(buf, sizeof *buf, sizeof buf, file);
