@@ -4,9 +4,8 @@
 #include "hexdump.h"
 
 static void
-print(const char *line, size_t len, void *data)
+print(const char *line, size_t len)
 {
-	(void)data;
 	fwrite(line, 1, len, stdout);
 	char c = '\n';
 	fwrite(&c, 1, 1, stdout);
@@ -26,7 +25,7 @@ main(int argc, char *argv[])
 		if (nread == 0) {
 			break;
 		}
-		hexdump(buf, nread, whence, print, NULL);
+		hexdump(buf, nread, whence, print);
 		whence += nread;
 	}
 	if (file != stdin) {
