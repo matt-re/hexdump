@@ -15,9 +15,17 @@ main(int argc, char *argv[])
 {
 	int result = EXIT_FAILURE;
 
-	FILE *file = argc > 1 ? fopen(argv[1], "rb") : stdin;
+	FILE *file = NULL;
+	const char *filename = NULL;
+	if (argc > 1) {
+		file = fopen(argv[1], "rb");
+		filename = argv[1];
+	} else {
+		file = stdin;
+		filename = "stdin";
+	}
 	if (!file) {
-		perror("File read error");
+		perror(filename);
 		goto done;
 	}
 
@@ -27,7 +35,7 @@ main(int argc, char *argv[])
 		size_t nread = fread(buf, 1, sizeof buf, file);
 		if (nread == 0) {
 			if (ferror(file)) {
-				perror("File read error");
+				perror(filename);
 				goto done;
 			}
 			break;
