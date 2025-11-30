@@ -8,7 +8,7 @@ typedef void (*hexdump_callback)(const char *line, size_t len);
 #ifdef __cplusplus
 extern "C" {
 #endif
-void hexdump(const void *ptr, size_t size, unsigned int whence, hexdump_callback cb);
+void hexdump(void *ptr, size_t size, size_t offset, hexdump_callback callback);
 #ifdef __cplusplus
 }
 #endif
@@ -17,67 +17,61 @@ void hexdump(const void *ptr, size_t size, unsigned int whence, hexdump_callback
 #ifdef HEXDUMP_IMPLEMENTATION
 
 void
-hexdump(const void *ptr, size_t size, unsigned int whence, hexdump_callback cb)
+hexdump(void *ptr, size_t size, size_t offset, hexdump_callback callback)
 {
-	char const * cur = ptr;
-	char const * const end = (char *)ptr + size;
-	/* index  size  description
+	static const char hex[] = "0123456789abcdef";
+	const unsigned char *cur = ptr;
+	const unsigned char * const end = cur + size;
+
+	/* offset size
 	 * ------------------------
-	 * 0      8     offset in bytes displayed in hex
-	 * 8      2     separator between address and data
-	 * 10     32    16 bytes per line printed in hex
-	 * 42     8     char separator after each 2 bytes
-	 * 50     1     char separator between hex and ascii
-	 * 51     16    16 bytes per line printed as ascii
-	 * 67     1     nul terminator
+	 * 0      8    address offset in hex
+	 * 8      1    " " separator
+	 * 9      40   16 bytes of data in hex and 8 " " separators
+	 * 49     1    " " separator
+	 * 50     16   16 bytes of data in ASCII
+	 * 66     1    nul terminator
 	 */
-	char line[68];
-	/* separator between address and data */
-	line[8]  = ':';
-	line[9]  = ' ';
-	/* separator after each 2 bytes */
-	line[14] = ' ';
-	line[19] = ' ';
-	line[24] = ' ';
-	line[29] = ' ';
-	line[34] = ' ';
-	line[39] = ' ';
-	line[44] = ' ';
+	char line[67];
+
+	line[8] = ' ';
+	line[13] = line[18] = line[23] = line[28] = ' ';
+	line[33] = line[38] = line[43] = line[48] = ' ';
 	line[49] = ' ';
-	/* separator between hex and ascii */
-	line[50] = ' ';
-	const char hex[] = "0123456789abcdef";
-	while (end > cur) {
+
+	while (cur < end) {
 		char *addr = line;
-		char *data = line + 10;
-		char *text = line + 51;
-		for (int i = sizeof(whence) * 7; i >= 0; i -= 4) {
-			*addr++ = hex[(whence >> i) & 15];
+		char *data = line + 9;
+		char *text = line + 50;
+
+		for (int i = 7; i >= 0; --i) {
+			*addr++ = hex[(offset >> (i * 4)) & 15];
 		}
-		ptrdiff_t len = (end - cur) < 16 ? (end - cur) : 16;
-		ptrdiff_t i = 0;
-		for (; i < len; i++) {
-			char ch = cur[i];
-			*data++ = hex[(ch >> 4) & 15];
-			*data++ = hex[(ch >> 0) & 15];
-			*text++ = ch > 31 && ch < 127 ? ch : '.';
-			/* jump over separator between every two bytes */
-			data += i % 2;
+
+		const ptrdiff_t num_bytes = end - cur;
+		const ptrdiff_t line_bytes = num_bytes < 16 ? num_bytes : 16;
+		for (ptrdiff_t i = 0; i < line_bytes; ++i) {
+			unsigned char byte = cur[i];
+			*data++ = hex[byte >> 4];
+			*data++ = hex[byte & 15];
+			data += i & 1;
+			*text++ = (byte >= 32 && byte < 127) ? (char)byte : '.';
 		}
-		for (; i < 16; i++) {
+		*text = '\0';
+
+		for (ptrdiff_t i = line_bytes; i < 16; ++i) {
 			*data++ = ' ';
 			*data++ = ' ';
-			data += i % 2;
+			data += i & 1;
 		}
-		size_t linelen = (size_t)(text - line);
-		line[linelen] = '\0';
-		whence += 16;
+
+		if (callback) {
+			callback(line, (size_t)(text - line));
+		}
+
+		offset += 16;
 		cur += 16;
-		if (cb) {
-			cb(line, linelen);
-		}
 	}
 }
 
 #endif /* HEXDUMP_IMPLEMENTATION */
-
