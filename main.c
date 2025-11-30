@@ -31,17 +31,14 @@ main(int argc, char *argv[])
 
 	unsigned char buf[4096];
 	size_t offset = 0;
-	for (;;) {
-		size_t nread = fread(buf, 1, sizeof buf, file);
-		if (nread == 0) {
-			if (ferror(file)) {
-				perror(filename);
-				goto done;
-			}
-			break;
-		}
+	size_t nread;
+	while ((nread = fread(buf, 1, sizeof buf, file)) > 0) {
 		hexdump(buf, nread, offset, print_line);
 		offset += nread;
+	}
+	if (ferror(file)) {
+		perror(filename);
+		goto done;
 	}
 	result = EXIT_SUCCESS;
 
