@@ -4,33 +4,42 @@
 #include "hexdump.h"
 
 static void
-print(const char *line, size_t len)
+print_line(const char *line, size_t len)
 {
-	fwrite(line, 1, len, stdout);
-	char c = '\n';
-	fwrite(&c, 1, 1, stdout);
+	printf("%.*s\n", (int)len, line);
 }
 
 int
 main(int argc, char *argv[])
 {
+	int result = 1;
+
 	FILE *file = argc > 1 ? fopen(argv[1], "rb") : stdin;
 	if (!file) {
-		return 1;
+		perror("File read error");
+		goto done;
 	}
-	char buf[512];
-	unsigned int whence = 0;
+
+	unsigned char buf[4096];
+	size_t offset = 0;
 	for (;;) {
-		size_t nread = fread(buf, sizeof *buf, sizeof buf, file);
+		size_t nread = fread(buf, 1, sizeof buf, file);
 		if (nread == 0) {
+			if (ferror(file)) {
+				perror("File read error");
+				goto done;
+			}
 			break;
 		}
-		hexdump(buf, nread, whence, print);
-		whence += nread;
+		hexdump(buf, nread, offset, print_line);
+		offset += nread;
 	}
-	if (file != stdin) {
+	result = 0;
+
+done:
+	if (file && file != stdin) {
 		fclose(file);
 	}
-	return 0;
-}
 
+	return result;
+}
