@@ -1,4 +1,5 @@
 #include <stdio.h>
+#include <stdlib.h>
 
 #define HEXDUMP_IMPLEMENTATION
 #include "hexdump.h"
@@ -12,7 +13,7 @@ print_line(const char *line, size_t len)
 int
 main(int argc, char *argv[])
 {
-	int result = 1;
+	int result = EXIT_FAILURE;
 
 	FILE *file = argc > 1 ? fopen(argv[1], "rb") : stdin;
 	if (!file) {
@@ -34,7 +35,7 @@ main(int argc, char *argv[])
 		hexdump(buf, nread, offset, print_line);
 		offset += nread;
 	}
-	result = 0;
+	result = EXIT_SUCCESS;
 
 done:
 	if (file && file != stdin) {
