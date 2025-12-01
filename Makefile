@@ -25,7 +25,7 @@ $(TARGET): $(OBJS)
 	$(CC) $(LDFLAGS) -o $@ $^
 
 clean:
-	@rm -f hexdump *.o
+	@rm -f $(TARGET) $(OBJS)
 
 run: $(TARGET)
 	./$(TARGET) main.c
