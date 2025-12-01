@@ -1,30 +1,31 @@
-CC	= clang
-CFLAGS	= -std=c99		\
-	  -O2			\
-	  -fstrict-aliasing	\
-	  -pedantic		\
-	  -Wall			\
-	  -Werror		\
-	  -Wextra		\
-	  -Wshadow		\
-	  -Wconversion		\
-	  -Wstrict-aliasing
-LDFLAGS	= -Wall -pedantic
+CC	:= clang
+CFLAGS	:= -std=c99		\
+	   -O2			\
+	   -fstrict-aliasing	\
+	   -pedantic		\
+	   -Wall		\
+	   -Werror		\
+	   -Wextra		\
+	   -Wshadow		\
+	   -Wconversion		\
+	   -Wstrict-aliasing
+LDFLAGS	:=
 
-all: hexdump
+TARGET	:= hexdump
+OBJS	:= main.o
+
+.PHONY: all clean run
+
+all: $(TARGET)
 
 %.o: %.c hexdump.h
 	$(CC) -c $(CFLAGS) $<
 
-hexdump: main.o
-	$(CC) -o $@ $(LDFLAGS) $^
-
-.PHONEY: clean
-.PHONEY: run
+$(TARGET): $(OBJS)
+	$(CC) $(LDFLAGS) -o $@ $^
 
 clean:
 	@rm -f hexdump *.o
 
-run: hexdump
-	./hexdump main.c
-
+run: $(TARGET)
+	./$(TARGET) main.c
