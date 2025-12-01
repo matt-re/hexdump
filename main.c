@@ -26,23 +26,23 @@ main(int argc, char *argv[])
 	}
 	if (!file) {
 		perror(filename);
-		goto done;
+		goto cleanup;
 	}
 
 	unsigned char buf[4096];
 	size_t offset = 0;
 	size_t nread;
-	while ((nread = fread(buf, 1, sizeof buf, file)) > 0) {
+	while ((nread = fread(buf, 1, sizeof(buf), file)) > 0) {
 		hexdump(buf, nread, offset, print_line);
 		offset += nread;
 	}
 	if (ferror(file)) {
 		perror(filename);
-		goto done;
+		goto cleanup;
 	}
 	result = EXIT_SUCCESS;
 
-done:
+cleanup:
 	if (file && file != stdin) {
 		fclose(file);
 	}
