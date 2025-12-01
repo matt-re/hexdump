@@ -51,7 +51,7 @@ hexdump(void *ptr, size_t size, size_t offset, hexdump_callback callback)
 		const ptrdiff_t num_bytes = end - cur;
 		const ptrdiff_t line_bytes = num_bytes < 16 ? num_bytes : 16;
 		for (ptrdiff_t i = 0; i < line_bytes; ++i) {
-			unsigned char byte = cur[i];
+			const unsigned char byte = cur[i];
 			*data++ = hex[byte >> 4];
 			*data++ = hex[byte & 15];
 			data += i & 1;
